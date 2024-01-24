@@ -39,6 +39,8 @@ public interface CustomerService {
 	
 	// This method is useful for frontend profile update
 	Customer updateCustomerEmail(Customer model, Long id);
+	
+	public Customer unlockAccount(Long id, String status) throws UserNotFoundException;
 
 
 }

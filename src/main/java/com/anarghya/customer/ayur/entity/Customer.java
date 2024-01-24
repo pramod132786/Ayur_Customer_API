@@ -18,23 +18,29 @@ public class Customer {
     private String customerName;
     @Column(unique = true)
     private String emailId;
+    @Column(unique = true)
     private String mobileNumber;
     private String password; 
     private String address;
+    private String status;
+    private int failedLoginAttempts;
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
+	}
+	public Integer getFailedLoginAttempts() {
+		return failedLoginAttempts;
+	}
+	public void setFailedLoginAttempts(Integer failedLoginAttempts) {
+		this.failedLoginAttempts = failedLoginAttempts;
+	}
 	public Customer() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
-	public Customer(Long customerId, String customerName, String emailId, String mobileNumber, String password,
-			String address) {
-		super();
-		this.customerId = customerId;
-		this.customerName = customerName;
-		this.emailId = emailId;
-		this.mobileNumber = mobileNumber;
-		this.password = password;
-		this.address = address;
-	}
+	
 	public Long getCustomerId() {
 		return customerId;
 	}
@@ -71,11 +77,25 @@ public class Customer {
 	public void setAddress(String address) {
 		this.address = address;
 	}
+	public Customer(Long customerId, String customerName, String emailId, String mobileNumber, String password,
+			String address, String status, Integer failedLoginAttempts) {
+		super();
+		this.customerId = customerId;
+		this.customerName = customerName;
+		this.emailId = emailId;
+		this.mobileNumber = mobileNumber;
+		this.password = password;
+		this.address = address;
+		this.status = status;
+		this.failedLoginAttempts = failedLoginAttempts;
+	}
 	@Override
 	public String toString() {
 		return "Customer [customerId=" + customerId + ", customerName=" + customerName + ", emailId=" + emailId
-				+ ", mobileNumber=" + mobileNumber + ", password=" + password + ", address=" + address + "]";
+				+ ", mobileNumber=" + mobileNumber + ", password=" + password + ", address=" + address + ", status="
+				+ status + ", failedLoginAttempts=" + failedLoginAttempts + "]";
 	}
+	
 	
 	
 }

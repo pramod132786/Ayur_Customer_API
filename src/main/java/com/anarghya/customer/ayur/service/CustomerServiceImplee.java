@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.anarghya.customer.ayur.entity.Customer;
 import com.anarghya.customer.ayur.entity.Login;
+import com.anarghya.customer.ayur.exception.AccountLockedException;
 import com.anarghya.customer.ayur.exception.UserNotFoundException;
 import com.anarghya.customer.ayur.loginresponse.LoginMesage;
 import com.anarghya.customer.ayur.repo.CustomerRepository;
@@ -77,6 +78,7 @@ public class CustomerServiceImplee implements CustomerService{
 			 java.util.Base64.Encoder  encoder= Base64.getEncoder();
 			String encodepassword=encoder.encodeToString(password.getBytes());
 			customer.setPassword(encodepassword);
+			customer.setStatus("Active");
 			customerRepository.save(customer);
 			return customer;
 		}
@@ -118,16 +120,30 @@ public class CustomerServiceImplee implements CustomerService{
 	    		String getpassword=encoder.encodeToString(password.getBytes());
 	            
 	            String encodedPassword = customer.getPassword();
+	            if(customer.getStatus().contains("Deactive")) {
+	            	return new LoginMesage("Deactive", false);
+	            }
+	            if (customer.getFailedLoginAttempts() >= 4) {
+	            	customer.setStatus("Locked");
+	            	customerRepository.save(customer);
+	                throw new AccountLockedException("Account is locked. Please contact support Team.");
+	            }
 	          //  Boolean isPwdRight = passwordEncoder.matches(password, encodedPassword);
 	            if (getpassword.equals(encodedPassword)) {
 //	                Optional<CustomerModel> customer = reop.findOneByEmailIdAndPassword(loginDAO.getEmailId(), encodedPassword);
 	            	  Optional<Customer> customer1 = customerRepository.findOneByEmailIdOrMobileNumberAndPassword(number, number, encodedPassword);
 	                if (customer1.isPresent()) {
+	                	customer.setFailedLoginAttempts(0);
+	                	customerRepository.save(customer);
 	                    return new LoginMesage("Login Success", true);
 	                } else {
+	                	customer.setFailedLoginAttempts(customer.getFailedLoginAttempts() + 1);
+	                	customerRepository.save(customer);
 	                    return new LoginMesage("Login Failed", false);
 	                }
 	            } else {
+	            	customer.setFailedLoginAttempts(customer.getFailedLoginAttempts() + 1);
+                	customerRepository.save(customer);
 	                return new LoginMesage("password Not Match", false);
 	            }
 	        }else {
@@ -152,6 +168,7 @@ public class CustomerServiceImplee implements CustomerService{
 			  if(mail.equals(m)) {
 				  
 				  SimpleMailMessage message = new SimpleMailMessage();
+				    message.setFrom("pramodgoskula@gmail.com");
 					message.setTo(mail);
 					message.setSubject("Reset you are password OTP ");
 					Random random =  new Random();
@@ -248,4 +265,18 @@ public class CustomerServiceImplee implements CustomerService{
 			return customerRepository.save(models);
 
  }
+
+		@Override
+		public Customer unlockAccount(Long id, String status) throws UserNotFoundException {
+			Optional<Customer> findById = customerRepository.findById(id);
+			if (findById.isEmpty()) {
+				return findById.orElseThrow(() -> new UserNotFoundException("User Not Found"));
+			} else {
+			    Customer customer = findById.get();
+			    customer.setStatus(status);
+			    customer.setFailedLoginAttempts(0);
+			    customerRepository.save(customer);
+				return customer;
+			}
+		}
 }

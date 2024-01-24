@@ -67,6 +67,13 @@ public class CustomerController {
 	 * 
 	 ****************************/
 
+	@GetMapping("/name")
+	public String name() {
+		return "china";
+	}
+	
+	
+	
 	@PostMapping("/customers")
 	public ResponseEntity<Customer> addNewCustomer(@RequestBody Customer customer) {
 		customerService.addNewCustomer(customer);
@@ -175,9 +182,16 @@ public class CustomerController {
 	
 	
 	@PostMapping("login")
-	public LoginMesage login(@RequestBody Login login) {
+	public ResponseEntity<LoginMesage> login(@RequestBody Login login) {
 	LoginMesage loginResponse = service.loginCustomer(login);
-		return loginResponse;
+		return new ResponseEntity<>(loginResponse,HttpStatus.OK);
+	}
+	
+	@PostMapping("/customers/{id}/{status}")
+	public Customer unlockAccount(@PathVariable Long id,@PathVariable String status) throws UserNotFoundException {
+		Customer account = customerService.unlockAccount(id, status);
+		return account;
+		
 	}
 	
 	/****************************
